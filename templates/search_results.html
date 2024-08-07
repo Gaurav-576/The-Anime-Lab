@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Animeflix</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #121212;
+        }
+        .header {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .header img {
+            height: 50px;
+            opacity: 0.8;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
+        .search-bar input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            width: 200px;
+        }
+        .search-bar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .search-bar button:hover {
+            background-color: #e14a1e;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .nav-links a:hover {
+            background-color: #ff5733;
+            transform: scale(1.05);
+        }
+        .nav-links a.active {
+            background-color: #ff5733;
+            color: #fff;
+        }
+        .content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .search-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            position: relative;
+        }
+        .result {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .result:hover {
+            transform: translateY(-5px);
+        }
+        .result img {
+            width: 100%;
+            border-radius: 8px 8px 0 0;
+        }
+        .result h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .result p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        .result a {
+            color: #ff5733;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .result a:hover {
+            text-decoration: underline;
+        }
+        .add-to-list {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 87, 51, 0.9);
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            transition: bottom 0.3s;
+            cursor: pointer;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+        }
+        .result:hover .add-to-list {
+            bottom: 0;
+        }
+        /* Popup styles */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .popup-overlay.active {
+            display: block;
+        }
+        .popup-content {
+            position: absolute;
+            background: #2e2e2e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            z-index: 1001;
+            transition: transform 0.3s, opacity 0.3s;
+            transform: translate(-50%, -50%);
+        }
+        .popup-overlay.active .popup-content {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: #333;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .popup-close:hover {
+            background-color: #444;
+        }
+        .popup-options {
+            margin-top: 20px;
+        }
+        .popup-options label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .popup-options input {
+            margin-right: 10px;
+        }
+        .popup-options input[type="radio"] {
+            accent-color: #ff5733;
+        }
+        .popup-options button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .popup-options button:hover {
+            background-color: #e14a1e;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="search-bar">
+            <form action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="q" placeholder="Search anime..." required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="#">Series</a>
+            <a href="#">Movies</a>
+            <a href="#">New & Popular</a>
+            <a href="#">My List</a>
+            <a href="{{ url_for('register') }}" class="icon-link">
+                <div class="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="icon" viewBox="0 0 16 16">
+                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                    </svg>
+                </div>
+            </a>
+        </nav>
+    </header>
+    <div class="content">
+        <h1>Search Results</h1>
+        <div class="search-results">
+            {% if results %}
+                {% for anime in results %}  
+                <div class="result">
+                    <a href="{{ url_for('anime', anime_id=anime['anime_id']) }}">
+                        <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+                        <h3>{{ anime['Name'] }}</h3>
+                    </a>
+                    <div class="add-to-list" onclick="showPopup(this)">+ Add to List</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No results found for your search.</p>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Popup Overlay -->
+    <div class="popup-overlay">
+        <div class="popup-content">
+            <div class="popup-close" onclick="closePopup()">×</div>
+            <h2>Add to List</h2>
+            <form class="popup-options">
+                <label>
+                    <input type="radio" name="status" value="watched"> Watched
+                </label>
+                <label>
+                    <input type="radio" name="status" value="watching"> Watching
+                </label>
+                <label>
+                    <input type="radio" name="status" value="interested"> Interested
+                </label>
+                <label>
+                    <input type="radio" name="status" value="stalled"> Stalled
+                </label>
+                <button type="button" onclick="addToList()">Add</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Popup functions
+        function showPopup(element) {
+            const popupOverlay = document.querySelector('.popup-overlay');
+            const popupContent = popupOverlay.querySelector('.popup-content');
+            const rect = element.getBoundingClientRect();
+
+            popupContent.style.left = (rect.left + window.scrollX) + 'px';
+            popupContent.style.top = (rect.bottom + window.scrollY) + 'px';
+            popupOverlay.classList.add('active');
+        }
+
+        function closePopup() {
+            const popupOverlay = document.querySelector('.popup-overlay');
+            popupOverlay.classList.remove('active');
+        }
+
+        function addToList() {
+            const selectedStatus = document.querySelector('input[name="status"]:checked').value;
+            console.log('Selected status:', selectedStatus);
+            closePopup();
+        }
+    </script>
+</body>
+</html>

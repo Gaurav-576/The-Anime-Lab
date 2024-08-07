@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animeflix Homepage</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('../static/images/bg3.jpg') no-repeat center center fixed;
+            overflow-x: hidden;
+            color: #fff; /* Default text color */
+            position: relative;
+            z-index: 1;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Adjust the opacity here */
+            z-index: -1;
+        }
+        .header {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5));
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+            height: 70px; /* Adjusted height of the header */
+        }
+        .header img.logo {
+            height: 80px;
+            opacity: 0.8;
+            margin-right: 20px;
+        }
+        .search-bar-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            max-width: 600px;
+        }
+        .search-bar input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            flex-grow: 1; /* Ensure search bar takes available space */
+        }
+        .search-bar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .search-bar button:hover {
+            background-color: #e14a1e;
+        }
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .nav-links a:hover {
+            background-color: #ff5733;
+            transform: scale(1.05);
+        }
+        .nav-links a.active {
+            background-color: #ff5733;
+            color: #fff;
+        }
+        .icon-container {
+            margin-left: 20px;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            fill: #fff;
+            transition: background-color 0.3s, transform 0.3s;
+            border-radius: 50%;
+            padding: 10px;
+            display: inline-block;
+        }
+        .icon:hover {
+            background-color: #ff5733;
+        }
+        .hero {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 70px; /* Ensure the hero section starts below the header */
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 {
+            font-size: 48px;
+            margin: 0;
+            color: #fff; /* Hero section heading color */
+        }
+        .hero p {
+            font-size: 24px;
+            margin: 10px 0 0;
+            color: #fff; /* Hero section paragraph color */
+        }
+        .section {
+            padding: 20px;
+            margin-top: 20px; /* Space below the hero section */
+            margin-bottom: 100px;
+            background-color: rgba(0, 0, 0, 0.7); /* Added background color for better contrast */
+            border-radius: 10px; /* Rounded corners for sections */
+        }
+        .section h2 {
+            color: #ff5733;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .section .movies {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0; /* Add some padding to the top and bottom */
+        }
+        .movie {
+            flex: 0 0 auto;
+            width: 200px;
+            background: rgba(0, 0, 0, 0.8); /* Darker background for better visibility */
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center; /* Center text inside movie cards */
+        }
+        .movie:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+        }
+        .movie img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px; /* Space between image and title */
+        }
+        .movie p {
+            margin: 0;
+            color: #fff; /* Movie title color */
+            font-size: 16px; /* Adjusted font size for better readability */
+        }
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.5); 
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+            color: #000; 
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <img src="../static/images/logo_no_bg.png" alt="Animeflix Logo" class="logo">
+        <div class="search-bar-container">
+            <form class="search-bar" action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="q" placeholder="Search anime..." required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}" class="active" id="home-link">Home</a>
+            <a href="{{ url_for('anime_list') }}" id="anime-link">Anime</a>
+            <a href="{{ url_for('manga_list') }}" id="manga-link">Manga</a>
+            <a href="{{ url_for('mylist') }}" id="my-list-link">My List</a>
+        </nav>
+        <div class="icon-container">
+            <a href="{{ url_for('register') }}" class="icon-link" id="profile-link">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+                </svg>
+            </a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Welcome to Animeflix</h1>
+            <p>Your ultimate destination for anime</p>
+        </div>
+        <div class="hero-overlay"></div>
+    </section>
+
+    <section class="section featured">
+        <h2>Featured Anime</h2>
+        <div class="movies">
+            {% for anime in featured %}
+            <div class="movie">
+                <a href="{{ url_for('anime', anime_id=anime['anime_id']) }}">
+                    <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+                    <p>{{ anime['Name'] }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section action">
+        <h2>Action Anime</h2>
+        <div class="movies">
+            {% for anime in action %}
+            <div class="movie">
+                <a href="{{ url_for('anime', anime_id=anime['anime_id']) }}">
+                    <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+                    <p>{{ anime['Name'] }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section adventure">
+        <h2>Adventure Anime</h2>
+        <div class="movies">
+            {% for anime in adventure %}
+            <div class="movie">
+                <a href="{{ url_for('anime', anime_id=anime['anime_id']) }}">
+                    <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+                    <p>{{ anime['Name'] }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section isekai">
+        <h2>Isekai Anime</h2>
+        <div class="movies">
+            {% for anime in isekai %}
+            <div class="movie">
+                <a href="{{ url_for('anime', anime_id=anime['anime_id']) }}">
+                    <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+                    <p>{{ anime['Name'] }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section romance">
+        <h2>Romance Anime</h2>
+        <div class="movies">
+            {% for anime in romance %}
+            <div class="movie">
+                <a href="{{ url_for('anime', anime_id=anime['anime_id']) }}">
+                    <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+                    <p>{{ anime['Name'] }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Modal for login reminder -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Please login to add anime to your wishlist.</p>
+            <button onclick="window.location.href='{{ url_for('login') }}'">Login</button>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("loginModal");
+        const closeModal = document.querySelector(".modal .close");
+
+        function showLoginModal() {
+            modal.style.display = "block";
+        }
+
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

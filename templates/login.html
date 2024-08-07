@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Animeflix</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: url('../static/images/bg3.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+        .login-container {
+            position: relative;
+            z-index: 2;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-top: 0;
+            color: #ff5733;
+            font-size: 24px;
+        }
+        .login-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .login-container label {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #fff;
+            text-align: left;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #fff;
+            color: #333;
+        }
+        .login-container button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-container button:hover {
+            background-color: #e14a1e;
+        }
+        .login-container .register-link {
+            margin-top: 15px;
+        }
+        .login-container .register-link a {
+            color: #ff5733;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .login-container .register-link a:hover {
+            text-decoration: underline;
+        }
+        .login-container .error-messages {
+            color: #ff5733;
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #dc3545; /* Default for error messages */
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            width: 280px;
+        }
+        .popup.success {
+            background-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form action="{{ url_for('login') }}" method="POST">
+            <label for="login_credentials">Username or Email:</label>
+            <input type="text" id="login_credentials" name="login_credentials" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            {% if error %}
+                <ul class="error-messages">
+                    <li>{{ error }}</li>
+                </ul>
+            {% endif %}
+
+            <button type="submit">Login</button>
+        </form>
+        <div class="register-link">
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessages = {{ get_flashed_messages(with_categories=true) | tojson }};
+            if (flashMessages.length > 0) {
+                console.log(flashMessages);
+                flashMessages.forEach(([category, message]) => {
+                    const popup = document.createElement('div');
+                    popup.className = `popup ${category}`;
+                    popup.textContent = message;
+                    document.body.appendChild(popup);
+                    popup.style.display = 'block';
+                    setTimeout(() => {
+                        popup.style.display = 'none';
+                    }, 5000);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

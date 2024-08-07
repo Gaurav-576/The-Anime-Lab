@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animeflix - {{ anime['Name'] }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('../static/images/bg3.jpg') no-repeat center center fixed;
+            background-size: cover; /* Ensure the background image covers the whole area */
+            overflow-x: hidden;
+            color: #fff; /* Default text color */
+            position: relative;
+            z-index: 1;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)); /* Darker gradient overlay */
+            filter: blur(32px); /* Apply blur effect */
+            z-index: -1;
+            opacity: 0.8; /* Adjust opacity to control the blur visibility */
+        }
+        .header {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5));
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+            height: 70px; /* Adjusted height of the header */
+        }
+        .header img.logo {
+            height: 80px;
+            opacity: 0.8;
+            margin-right: 20px;
+        }
+        .search-bar-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            max-width: 600px;
+        }
+        .search-bar input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            flex-grow: 1; /* Ensure search bar takes available space */
+        }
+        .search-bar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .search-bar button:hover {
+            background-color: #e14a1e;
+        }
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .nav-links a:hover {
+            background-color: #ff5733;
+            transform: scale(1.05);
+        }
+        .nav-links a.active {
+            background-color: #ff5733;
+            color: #fff;
+        }
+        .icon-container {
+            margin-left: 20px;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            fill: #fff;
+            transition: background-color 0.3s, transform 0.3s;
+            border-radius: 50%;
+            padding: 10px;
+            display: inline-block;
+        }
+        .icon:hover {
+            background-color: #ff5733;
+        }
+        .content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .anime-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .anime-details h1 {
+            font-size: 36px;
+        }
+
+        .top-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        .top-row .item {
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .top-row .item button {
+            background: transparent;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            background-color: #333;
+        }
+        .dropdown-content {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2); 
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .dropdown-content div {
+            margin-right: 10px;
+            margin-left: 5px;
+        }
+        .dropdown-content select {
+            background: #333;
+            border: 1px solid white;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .anime-info {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .anime-image img {
+            width: 300px;
+            height: auto;
+            border-radius: 8px;
+        }
+        .description {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .description p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .section-title {
+            font-size: 24px;
+            color: #ff5733;
+        }
+        .favorites {
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 2px 10px 2px 0px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .favorites button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: gold;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .favorites button.filled {
+            color: orange;
+        }
+        .favorites button:before {
+            content: '\2606';
+        }
+        .favorites button.filled:before {
+            content: '\2605';
+        }
+        .favorites span {
+            font-size: 18px;
+            color: #fff;
+        }
+        .section-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .genres-container {
+            margin-bottom: 10px;
+        }
+        .genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .genres .tag,
+        .shadow-tags .tag {
+            background: linear-gradient(135deg, #ff5733, #ffcc33);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 16px;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .genres .tag:hover,
+        .shadow-tags .tag:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #ffcc33, #ff5733);
+        }
+        .recommendations {
+            margin-top: 20px;
+        }
+        .recommendations h2 {
+            font-size: 24px;
+            color: #ff5733;
+            margin-bottom: 10px;
+        }
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+        .movie {
+            flex: 0 0 auto;
+        }
+        .movie img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .movie p {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            position: relative;
+        }
+        .result {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .result:hover {
+            transform: translateY(-5px);
+        }
+        .result img {
+            width: 100%;
+            border-radius: 8px 8px 0 0;
+        }
+        .result h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .result p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        .result a {
+            color: #ff5733;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .result a:hover {
+            text-decoration: underline;
+        }
+
+        .add-to-list {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 87, 51, 0.9);
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            transition: bottom 0.3s;
+            cursor: pointer;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+        }
+        .add-to-list button {
+            background: transparent;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result:hover .add-to-list {
+            bottom: 0;
+        }
+        .status-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .status-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .status-content {
+            background: #2e2e2e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.3s;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+        .status-overlay.active .status-content {
+            opacity: 1;
+        }
+        .status-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: #333;
+            color: #f
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .status-close:hover {
+            background-color: #444;
+        }
+        .status-options {
+            margin-top: 20px;
+        }
+        .status-options label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .status-options input {
+            margin-right: 10px;
+        }
+        .status-options input[type="radio"] {
+            accent-color: #ff5733;
+        }
+        .status-options button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .status-options button:hover {
+            background-color: #e14a1e;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="header">
+        <img src="../static/images/logo_no_bg.png" alt="Animeflix Logo" class="logo">
+        <div class="search-bar-container">
+            <form class="search-bar" action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="q" placeholder="Search anime..." required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}" class="active" id="home-link">Home</a>
+            <a href="{{ url_for('anime_list') }}" id="anime-link">Anime</a>
+            <a href="{{ url_for('manga_list') }}" id="manga-link">Manga</a>
+            <a href="{{ url_for('mylist') }}" id="my-list-link">My List</a>
+        </nav>
+        <div class="icon-container">
+            <a href="{{ url_for('register') }}" class="icon-link" id="profile-link">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+                </svg>
+            </a>
+        </div>
+    </header>
+    <div class="content">
+        <div class="anime-details">
+            <h1>{{ anime['Name'] }}</h1>
+            <div class="top-row">
+                <div class="item">
+                    <strong>{{ anime['Type'] }}</strong> ({{ anime['Episodes'] }} Episodes)
+                </div>
+                <div class="item">
+                    <strong>Studios:</strong> {{ anime['Studios'] }}
+                </div>
+                <div class="item">
+                    <strong>Year:</strong> {{ anime['Start_Year'] }} - {{ anime['End_Year'] if anime['End_Year'] != 'Present' else 'Present' }}
+                </div>
+                <div class="item">
+                    <strong>Rating:</strong> {{ anime['Score'] }}/10
+                </div>
+                <div class="item">
+                    <strong>Rank:</strong> {{ anime['Rank'] }}
+                </div>
+                <div class="favorites">
+                    <button id="favorite-star" title="Add to Favorites"></button>
+                    <span id="favorites-count">{{ anime['Favorites'] }}</span>
+                </div>
+                <div class="status">
+                    <div class="dropdown">
+                        <div class="dropdown-content">
+                            <div>Status:</div>
+                            <select onchange="updateStatus(this.value)">
+                                <option value="">Unwatched</option>
+                                <option value="watched">Watched</option>
+                                <option value="watching">Watching</option>
+                                <option value="interedted">Interested to watch</option>
+                                <option value="stalled">Stalled</option>
+                                <option value="dropped">Dropped</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="anime-info">
+            <div class="anime-image">
+                <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+            </div>
+            <div class="description">
+                <div class="section-container genres-container">
+                    <span class="section-title">Tags:</span>
+                    <div class="genres">
+                        {% for genre in anime['Genres'].split(',') %}
+                            <div class="tag">{{ genre }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="section">
+                    <span class="section-title">Description:</span>
+                    <p>{{ anime['Synopsis'] }}</p>
+                </div>
+                <div class="section-container">
+                    <span class="section-title">Licensors:</span>
+                    <p>{{ anime['Licensors'] }}</p>
+                </div>
+                <div class="section-container">
+                    <span class="section-title">Source:</span>
+                    <p>{{ anime['Source'] }}</p>
+                </div>
+                <div class="section-container">
+                    <span class="section-title">Members:</span>
+                    <p>{{ anime['Members'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <h2>Suggested Animes</h2>
+            <div class="recommendations">
+                {% for rec in recommendations %}
+                <div class="result">
+                    <a href="{{ url_for('anime', anime_id=rec['anime_id']) }}">
+                        <img src="{{ rec['Image URL'] }}" alt="{{ rec['Name'] }}">
+                        <h3>{{ rec['Name'] }}</h3>
+                    </a>
+                    <div class="add-to-list">
+                        <button onclick="showStatusOverlay(this)">+ Add to List</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="status-overlay">
+        <div class="status-content">
+            <div class="status-close" onclick="closeStatusOverlay()">×</div>
+            <h2>Select Status</h2>
+            <form class="status-options" id="statusForm">
+                <label><input type="radio" name="status" value="watching" required> Watching</label>
+                <label><input type="radio" name="status" value="completed" required> Completed</label>
+                <label><input type="radio" name="status" value="plan-to-watch" required> Interested to Watch</label>
+                <label><input type="radio" name="status" value="on-hold" required> Stalled</label>
+                <label><input type="radio" name="status" value="not-interested" required> Not Interested</label>
+                <button type="submit">Confirm</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showStatusOverlay(button) {
+            const statusOverlay = document.querySelector('.status-overlay');
+            const statusContent = document.querySelector('.status-content');
+
+            const rect = button.getBoundingClientRect();
+            statusContent.style.top = `${rect.bottom + window.scrollY + 10}px`;
+            statusContent.style.left = `${rect.left + window.scrollX + (button.offsetWidth / 2) - (statusContent.offsetWidth / 2)}px`;
+            
+            statusOverlay.classList.add('active');
+        }
+        
+        function closeStatusOverlay() {
+            const statusOverlay = document.querySelector('.status-overlay');
+            statusOverlay.classList.remove('active');
+        }
+    </script>
+</body>
+</html>

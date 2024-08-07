@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Animeflix</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #121212;
+        }
+
+        .sidebar {
+            background-color: #1a1a1a;
+            width: 250px;
+            padding: 20px;
+            height: 100vh;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            border: 4px solid #ff5733;
+        }
+
+        .profile h2 {
+            margin: 10px 0 0;
+            color: #ff5733;
+            font-size: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            display: block;
+            text-align: center;
+        }
+
+        .nav-links a:hover {
+            background-color: #ff5733;
+            transform: scale(1.05);
+        }
+
+        .nav-links a.active {
+            background-color: #ff5733;
+            color: #fff;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #ff5733;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #c43e1a;
+        }
+
+        .btn:hover {
+            background-color: #e14a1e;
+        }
+
+        .btn:active {
+            background-color: #e14a1e;
+            box-shadow: 0 5px #a83e16;
+            transform: translateY(4px);
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            width: calc(100% - 270px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .statistics {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .statistics h2 {
+            margin-top: 0;
+            color: #ff5733;
+        }
+
+        .stat-bar {
+            background-color: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .stat-bar span {
+            display: block;
+            height: 25px;
+            border-radius: 5px;
+        }
+
+        .stat-bar span.action {
+            width: 80%;
+            background-color: #ff5733;
+        }
+
+        .stat-bar span.adventure {
+            width: 60%;
+            background-color: #ff9f33;
+        }
+
+        .stat-bar span.romance {
+            width: 50%;
+            background-color: #ff5733;
+        }
+
+        .stat-bar span.isekai {
+            width: 40%;
+            background-color: #ff9f33;
+        }
+
+        .stat-bar span.comedy {
+            width: 70%;
+            background-color: #ff5733;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="profile">
+            <img src="{{ url_for('static', filename='assets/images/avatar.png') }}" alt="Profile Picture">
+            <h2>{{ user.username }}</h2>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('mylist') }}" class="active">Dashboard</a>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="#">Anime</a>
+            <a href="#">Manga</a>
+        </nav>
+        <a href="{{ url_for('home') }}" class="btn" onclick="confirmLogout(event)">Logout</a>
+    </aside>
+    <div class="content">
+        <div class="statistics">
+            <h2>Viewing Statistics</h2>
+            <div class="stat-bar">
+                <span class="action" style="width: 80%;">Action 80%</span>
+            </div>
+            <div class="stat-bar">
+                <span class="adventure" style="width: 60%;">Adventure 60%</span>
+            </div>
+            <div class="stat-bar">
+                <span class="romance" style="width: 50%;">Romance 50%</span>
+            </div>
+            <div class="stat-bar">
+                <span class="isekai" style="width: 40%;">Isekai 40%</span>
+            </div>
+            <div class="stat-bar">
+                <span class="comedy" style="width: 70%;">Comedy 70%</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        function confirmLogout(event) {
+            if (!confirm("Are you sure you want to logout?")) {
+                event.preventDefault();
+            }
+        }
+    </script>
+</body>
+
+</html>
