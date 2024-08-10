@@ -116,6 +116,7 @@
     <div class="login-container">
         <h2>Login</h2>
         <form action="{{ url_for('login') }}" method="POST">
+            {{ form.hidden_tag() }}
             <label for="login_credentials">Username or Email:</label>
             <input type="text" id="login_credentials" name="login_credentials" required>
             

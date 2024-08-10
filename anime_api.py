@@ -22,37 +22,12 @@ app.config['SECRET_KEY'] = 'secretkey'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
-# Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-class User(UserMixin):
-    def __init__(self, id, username, email, password):
-        self.id = id
-        self.username = username
-        self.email = email
-        self.password = password
-
-@login_manager.user_loader
-def load_user(user_id):
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
-    user = cursor.fetchone()
-    cursor.close()
-    if user:
-        return User(id=user['id'], username=user['username'], email=user['email'], password=user['password'])
-    return None
-
-
 def load_data_and_model():
     global df_anime, df_ratings, user_weights, anime_weights, user_encoder, anime_encoder
-
     df_anime = pd.read_csv('C:/Users/HP/Major Projects/data/filtered_dataset.csv')
     df_ratings = pd.read_csv('C:/Users/HP/Major Projects/data/ratings.csv')
     with open('C:/Users/HP/Major Projects/data/recommend.pkl', 'rb') as file:
         model = pickle.load(file)
-    
     user_encoder = LabelEncoder()
     df_ratings["user_encoded"] = user_encoder.fit_transform(df_ratings["user_id"])
     anime_encoder = LabelEncoder()
@@ -62,12 +37,10 @@ def load_data_and_model():
         weights = weight_layer.get_weights()[0]
         weights = weights / np.linalg.norm(weights, axis=1).reshape((-1, 1))
         return weights
-
     user_weights = extract_weights('embedding', model)
     anime_weights = extract_weights('embedding_1', model)
     threshold = 1000
     df_anime = df_anime.query('Members >= @threshold')
-
 load_data_and_model()
 
 #homepage
@@ -93,26 +66,42 @@ def home():
     )
 
 
+#flask login
+login_manager=LoginManager()
+login_manager.init_app(app)
+login_manager.login_view='login'
+class User(UserMixin):
+    def __init__(self, id, username, email, password):
+        self.id=id
+        self.username=username
+        self.email=email
+        self.password=password
+@login_manager.user_loader
+def load_user(user_id):
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    if user:
+        return User(id=user['id'], username=user['username'], email=user['email'], password=user['password'])
+    return None
+#registration
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    name = StringField('Name', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Register')
-
-# Registration route
+    username=StringField('Username', validators=[DataRequired()])
+    name=StringField('Name', validators=[DataRequired()])
+    email=StringField('Email', validators=[DataRequired(), Email()])
+    password=PasswordField('Password', validators=[DataRequired()])
+    confirm_password=PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit=SubmitField('Register')
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
+    form=RegistrationForm()
     if form.validate_on_submit():
-        name = form.name.data
-        username = form.username.data
-        email = form.email.data
-        password = form.password.data
-
-        encrypted_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-
+        name=form.name.data
+        username=form.username.data
+        email=form.email.data
+        password=form.password.data
+        encrypted_password=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         try:
             with mysql.connection.cursor() as cursor:
                 cursor.execute('INSERT INTO users(name, username, email, password) VALUES(%s, %s, %s, %s)', (name, username, email, encrypted_password))
@@ -120,33 +109,29 @@ def register():
                 flash("Registration successful! Please login to access your details.", "success")
                 return redirect(url_for('login'))
         except mysql.connection.Error as e:
-            if e.args[0] == 1062:
+            if e.args[0]==1062:
                 flash("Username or email already exists. Please choose a different one.", "error")
             else:
                 flash(f"An error occurred: {e}", 'error')
             return redirect(url_for('register'))
     return render_template('register.html', form=form)
 
-# Login form
+#login
 class LoginForm(FlaskForm):
-    login_credentials = StringField('Username or Email', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
-
-# Login route
+    login_credentials=StringField('Username or Email', validators=[DataRequired()])
+    password=PasswordField('Password', validators=[DataRequired()])
+    submit=SubmitField('Login')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    form=LoginForm()
     if form.validate_on_submit():
-        login_credentials = form.login_credentials.data
-        password = form.password.data
-        
-        cursor = mysql.connection.cursor()
+        login_credentials=form.login_credentials.data
+        password=form.password.data
+        cursor=mysql.connection.cursor()
         cursor.execute('SELECT * FROM users WHERE username=%s OR email=%s', (login_credentials, login_credentials))
-        user = cursor.fetchone()
+        user=cursor.fetchone()
         cursor.close()
-
-        if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+        if user and bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()):
             flash("Login successful!", 'success')
             user_obj = User(id=user['id'], username=user['username'], email=user['email'], password=user['password'])
             login_user(user_obj)
@@ -198,10 +183,14 @@ def anime(anime_id):
     recommendations=recommendations.to_dict(orient='records')
     return render_template('animePage.html', anime=anime, recommendations=recommendations)
 
-
-@app.route('/animeList')
-def anime_list():
-    return render_template('animeList.html')
+#by genre classification
+@app.route('/animeList/<string:genre>')
+def anime_list(genre):
+    genre_df=df_anime[df_anime['Genres'].apply(lambda x: genre in x)]
+    genre_df=genre_df[:20]
+    genre_df=genre_df.sort_values(by='Rating',ascending=False)
+    filtered_anime=genre_df.to_dict(orient="records")
+    return render_template('animeList.html',results=filtered_anime)
 
 @app.route('/mangaList/')
 def manga_list():

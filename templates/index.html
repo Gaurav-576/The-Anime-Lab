@@ -8,7 +8,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: url('../static/images/bg3.jpg') no-repeat center center fixed;
+            background: url('../static/images/bg1.jpg') no-repeat center center fixed;
             overflow-x: hidden;
             color: #fff; /* Default text color */
             position: relative;
@@ -245,7 +245,7 @@
         </div>
         <nav class="nav-links">
             <a href="{{ url_for('home') }}" class="active" id="home-link">Home</a>
-            <a href="{{ url_for('anime_list') }}" id="anime-link">Anime</a>
+            <a href="{{ url_for('anime_list', genre='featured') }}" id="anime-link">Anime</a>
             <a href="{{ url_for('manga_list') }}" id="manga-link">Manga</a>
             <a href="{{ url_for('mylist') }}" id="my-list-link">My List</a>
         </nav>
