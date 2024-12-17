@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animeflix - {{ anime['Name'] }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('../static/images/bg1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9));
+            filter: blur(32px);
+            z-index: -1;
+            opacity: 0.8;
+        }
+        .overlay {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(2px);
+            z-index: -1;
+        }
+        .header {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+            height: 70px;
+        }
+        .header img.logo {
+            height: 80px;
+            opacity: 0.8;
+            margin-right: 20px;
+        }
+        .search-bar-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            max-width: 600px;
+        }
+        .search-bar input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            flex-grow: 1;
+        }
+        .search-bar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .search-bar button:hover {
+            background-color: #e14a1e;
+        }
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .nav-links a:hover {
+            background-color: #ff5733;
+            transform: scale(1.05);
+        }
+        .nav-links a.active {
+            background-color: #ff5733;
+            color: #fff;
+        }
+        .icon-container {
+            margin-left: 20px;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            fill: #fff;
+            transition: background-color 0.3s, transform 0.3s;
+            border-radius: 50%;
+            padding: 10px;
+            display: inline-block;
+        }
+        .icon:hover {
+            background-color: #ff5733;
+        }
+        .content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .content h2 {
+            font-size: 36px;
+            font-weight: 600;
+            text-align: left;
+            margin: 20px 0 10px;
+            padding-bottom: 10px;
+            color: #ecf0f1;
+            border-bottom: 3px solid #f39c12;
+            display: inline-block;
+        }
+        .content h1 {
+            margin-top: 80px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 
+                0 0 15px #ff007f,
+                0 0 30px #ff007f, 
+                0 0 45px #00e1ff,
+                0 0 60px #00e1ff, 
+                0 0 75px #00e1ff, 
+                0 0 80px #ffffff;
+            animation: neon-flicker 1.5s infinite alternate, neon-glow 3s infinite;
+        }
+          
+        
+        @keyframes neon-flicker {
+            0% {
+                text-shadow: 
+                    0 0 10px #ff007f, 
+                    0 0 20px #ff007f, 
+                    0 0 30px #00e1ff, 
+                    0 0 40px #00e1ff, 
+                    0 0 50px #ffffff;
+                }
+            50% {
+                text-shadow: 
+                    0 0 5px #ff007f, 
+                    0 0 10px #ff007f, 
+                    0 0 20px #00e1ff, 
+                    0 0 30px #00e1ff, 
+                    0 0 40px #ffffff;
+                }
+            100% {
+                text-shadow: 
+                    0 0 15px #ff007f, 
+                    0 0 30px #ff007f, 
+                    0 0 45px #00e1ff, 
+                    0 0 60px #00e1ff, 
+                    0 0 90px #ffffff;
+                }
+        }
+          
+        @keyframes neon-glow {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        
+        .anime-details {
+            margin-bottom: 30px;
+            background: transparent;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 16px 20px rgba(0, 0, 0, 0.8);
+            color: #f4f4f4;
+        }
+        .top-row {
+            margin-top: -40px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 15px;
+            color: #ffffff;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), inset 0 0 1px rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+        .item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 0 2px rgba(255, 255, 255, 0.4);
+        } 
+        .item:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.97);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .item span {
+            background: linear-gradient(135deg, #7afcff, #feff9c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        } 
+        .item .strong {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+          
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            background-color: #333;
+        }
+        .dropdown-content {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2); 
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .dropdown-content div {
+            margin-right: 10px;
+            margin-left: 5px;
+        }
+        .dropdown-content select {
+            background: #333;
+            border: 1px solid white;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .anime-info {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .anime-image img {
+            width: 100%;
+            width: 300px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+          
+        .anime-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+        }
+          
+        .anime-image img:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+          
+        .description {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .description p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .section-title {
+            font-size: 32px;
+            font-weight: 600;
+            text-align: left;
+            margin: 20px 0 10px;
+            padding-bottom: 10px;
+            color: #ecf0f1;
+            border-bottom: 3px solid #f39c12;
+            display: inline-block;
+        }          
+        .favorites {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 10px;
+            color: #ffffff;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), inset 0 0 1px rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+        .favorites:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 0 2px rgba(255, 255, 255, 0.4);
+        }
+        .favorites:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.97);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .favorites span {
+            background: linear-gradient(135deg, #7afcff, #feff9c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        .favorites button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: gold;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .favorites button.filled {
+            color: orange;
+        }
+        .favorites button:before {
+            content: '\2606';
+        }
+        .favorites button.filled:before {
+            content: '\2605';
+        }
+        .favorites span {
+            font-size: 18px;
+            color: #fff;
+        }
+        .section-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .genres-container {
+            margin-bottom: 10px;
+        }
+        .genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .genres .tag,
+        .shadow-tags .tag {
+            background: linear-gradient(135deg, #ff5733, #ffcc33);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 16px;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .genres .tag:hover,
+        .shadow-tags .tag:hover {
+            transform: scale(1.1);
+            pointer: cursor;
+            background: linear-gradient(135deg, #ffcc33, #ff5733);
+        }
+        .recommendations {
+            margin-top: 20px;
+        }
+        .recommendations h3 {
+            font-size: 24px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+        .movie {
+            flex: 0 0 auto;
+        }
+        .movie img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .movie p {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            position: relative;
+        }
+        .result {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .result:hover {
+            transform: translateY(-5px);
+        }
+        .result img {
+            width: 100%;
+            border-radius: 8px 8px 0 0;
+        }
+        .result h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .result p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        .result a {
+            color: #ff5733;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .result a:hover {
+            text-decoration: underline;
+        }
+
+        .add-list-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+        }
+        .add-list-item button {
+            background-color: #ff5733;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .add-list-item button:hover {
+            background-color: #c8102e;
+            transform: scale(1.05);
+        }
+
+        .add-to-list {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 87, 51, 0.9);
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            transition: bottom 0.3s;
+            cursor: pointer;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+        }
+        .add-to-list button {
+            background: transparent;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result:hover .add-to-list {
+            bottom: 0;
+        }
+        .status-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .status-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .status-content {
+            background: #2e2e2e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.3s;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+        .status-overlay.active .status-content {
+            opacity: 1;
+        }
+        .status-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: #333;
+            color: #f
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .status-close:hover {
+            background-color: #444;
+        }
+        .status-options {
+            margin-top: 20px;
+        }
+        .status-options label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .status-options input {
+            margin-right: 10px;
+        }
+        .status-options input[type="radio"] {
+            accent-color: #ff5733;
+        }
+        .status-options button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .status-options button:hover {
+            background-color: #e14a1e;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="header">
+        <img src="../static/images/mainBG.png" alt="Animeflix Logo" class="logo">
+        <div class="search-bar-container">
+            <form class="search-bar" action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="q" placeholder="Search anime..." required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}" id="home-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-fill" viewBox="0 0 16 16">
+                    <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/>
+                    <path d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293z"/>
+                </svg>
+            </a>
+            <a href="{{ url_for('anime_list', genre='Action') }}" class="filter-button" id="anime-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel-fill" viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+                </svg>
+            </a>
+        </nav>
+    </header>
+    <div class="content">
+        <h1>{{ anime['Name'] }}</h1>
+        <div class="anime-details">
+            <div class="top-row">
+                <div class="item">
+                    <strong>{{ anime['Type'] }}</strong> ({{ anime['Episodes'] }} Episodes)
+                </div>
+                <div class="item">
+                    <strong>Studios:</strong> {{ anime['Studios'] }}
+                </div>
+                <div class="item">
+                    <strong>Year:</strong> {{ anime['Start_Year'] }} - {{ anime['End_Year'] if anime['End_Year'] != 'Present' else 'Present' }}
+                </div>
+                <div class="item">
+                    <strong>Rating:</strong> {{ anime['Score'] }}/10
+                </div>
+                <div class="item">
+                    <strong>Rank:</strong> {{ anime['Rank'] }}
+                </div>
+                <div class="favorites">
+                    <button id="favorite-star" title="Add to Favorites"></button>
+                    <span id="favorites-count">{{ anime['Favorites'] }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="anime-info">
+            <div class="anime-image">
+                <img src="{{ anime['Image URL'] }}" alt="{{ anime['Name'] }}">
+            </div>
+            <div class="description">
+                <div class="section-container genres-container">
+                    <span class="section-title">Tags:</span>
+                    <div class="genres">
+                        {% for genre in anime['Genres'].split(',') %}
+                            <div class="tag">{{ genre }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="section">
+                    <span class="section-title">Description:</span>
+                    <p>{{ anime['Synopsis'] }}</p>
+                </div>
+                <div class="section-container">
+                    <span class="section-title">Licensors:</span>
+                    <p>{{ anime['Licensors'] }}</p>
+                </div>
+                <div class="section-container">
+                    <span class="section-title">Source:</span>
+                    <p>{{ anime['Source'] }}</p>
+                </div>
+                <div class="section-container">
+                    <span class="section-title">Members:</span>
+                    <p>{{ anime['Members'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <h2>Suggested Animes</h2>
+            <div class="recommendations">
+                {% for rec in recommendations %}
+                <div class="result">
+                    <a href="{{ url_for('anime', anime_id=rec['anime_id']) }}">
+                        <img src="{{ rec['Image URL'] }}" alt="{{ rec['Name'] }}">
+                        <h3>{{ rec['Name'] }}</h3>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

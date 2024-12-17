@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animeflix Homepage</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('../static/images/bg1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .overlay {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: -1;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(2px);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+            height: 70px;
+        }
+
+        .header img.logo {
+            height: 80px;
+            opacity: 0.8;
+            margin-right: 20px;
+        }
+
+        .search-bar-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .search-bar input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            flex-grow: 1;
+        }
+
+        .search-bar button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .search-bar button:hover {
+            background-color: #e14a1e;
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 45%;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #ff5733;
+            border-radius: 45%;
+            transform: scale(1.05);
+        }
+        .nav-links a.active {
+            background-color: #ff5733;
+            border-radius: 45%;
+        }
+        .genre-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding-top: 90px;
+        }
+        .genre-button {
+            background-color: #ff5733;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .genre-button:hover {
+            background-color: #e14a1e;
+            transform: scale(1.05);
+        }
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+        .movie {
+            flex: 0 0 auto;
+        }
+        .movie img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .movie p {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            justify-items: center;
+            margin-top: 20px;
+        }
+        .result {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .card {
+            display: block;
+            text-decoration: none;
+            background-color: #333333;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            max-width: 240px;
+            position: relative;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card-image img {
+            width: 100%;
+            height: auto;
+            border-bottom: 4px solid #007bff;
+        }
+        .card-content {
+            padding: 15px;
+            text-align: center;
+            background-color: #333;  /* Darker background for content */
+            color: #fff;  /* White text to contrast with dark background */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .card-content h3 {
+            font-size: 18px;
+            margin-top: 10px;
+            transition: color 0.3s ease;
+        }
+        .card:hover .card-content {
+            background-color: #444;
+        }
+        .card:hover .card-content h3 {
+            color: #007bff
+        }
+        @media (max-width: 768px) {
+            .recommendations {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .card {
+                max-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="header">
+        <img src="../static/images/mainBG.png" alt="Animeflix Logo" class="logo">
+        <div class="search-bar-container">
+            <form class="search-bar" action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="q" placeholder="Search anime..." required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}" id="home-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-fill" viewBox="0 0 16 16">
+                    <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/>
+                    <path d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293z"/>
+                </svg>
+            </a>
+            <a href="{{ url_for('anime_list', genre='Action') }}" class="active" id="anime-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel-fill" viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+                </svg>
+            </a>
+        </nav>
+    </header>
+
+        <div class="genre-buttons">
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Action') }}'">Action</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Award Winning') }}'">Award Winning</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Sci-Fi') }}'">Sci-Fi</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Adventure') }}'">Adventure</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Drama') }}'">Drama</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Mystery') }}'">Mystery</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Supernatural') }}'">Supernatural</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Fantasy') }}'">Fantasy</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Sports') }}'">Sports</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Comedy') }}'">Comedy</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Romance') }}'">Romance</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Slice of Life') }}'">Slice of Life</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Suspense') }}'">Suspense</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Gourmet') }}'">Gourmet</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Avant Garde') }}'">Avant Garde</button>
+            <button class="genre-button" onclick="window.location.href='{{ url_for('anime_list', genre='Horror') }}'">Horror</button>
+        </div>
+
+        <div class="content">
+            <div class="recommendations">
+                {% for rec in results %}
+                <div class="result">
+                    <a href="{{ url_for('anime', anime_id=rec['anime_id']) }}" class="card">
+                        <div class="card-image">
+                            <img src="{{ rec['Image URL'] }}" alt="{{ rec['Name'] }}">
+                        </div>
+                        <div class="card-content">
+                            <h3>{{ rec['Name'] }}</h3>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>        
+    </body>
+</html>
